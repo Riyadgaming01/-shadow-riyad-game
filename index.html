@@ -1,1 +1,119 @@
- index.html
+ <!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SHADOW RIYAD</title>
+<style>
+body{margin:0;background:#080b16;color:white;font-family:Arial;text-align:center}
+h2{color:#a9caff}
+canvas{display:block}
+#game{width:100%;height:65vh}
+button{background:#172b49;color:white;border:1px solid #9bbcff;
+padding:17px;margin:7px;border-radius:12px;font-weight:bold}
+</style>
+</head>
+<body>
+<h2>⚔ SHADOW RIYAD ⚔</h2>
+<p>3D Shadow Battle</p>
+<div id="game"></div>
+<p id="info">শত্রুকে পরাজিত করো!</p>
+<button onclick="move(-1)">◀</button>
+<button onclick="jump()">JUMP</button>
+<button onclick="move(1)">▶</button>
+<button onclick="hit()">⚔ ATTACK</button>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script>
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x090d1b);
+scene.fog=new THREE.Fog(0x090d1b,10,28);
+
+const camera=new THREE.PerspectiveCamera(60,1,0.1,100);
+camera.position.set(0,4,10);
+camera.lookAt(0,1,0);
+
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(document.getElementById("game").clientWidth,
+document.getElementById("game").clientHeight);
+document.getElementById("game").appendChild(renderer.domElement);
+
+scene.add(new THREE.HemisphereLight(0x9bbcff,0x151020,2));
+const light=new THREE.DirectionalLight(0xffffff,2);
+light.position.set(-4,8,5);
+scene.add(light);
+
+const floor=new THREE.Mesh(
+new THREE.BoxGeometry(30,.3,8),
+new THREE.MeshStandardMaterial({color:0x303747})
+);
+floor.position.y=-.2;
+scene.add(floor);
+
+function warrior(color){
+let g=new THREE.Group();
+function part(x,y,z,sx,sy,sz,c){
+let m=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),
+new THREE.MeshStandardMaterial({color:c}));
+m.position.set(x,y,z);g.add(m);
+}
+part(0,1.4,0,.8,1,.45,color);
+part(0,2.2,0,.55,.55,.5,0x151a28);
+part(0,2.12,.27,.45,.12,.08,0x050505);
+part(-.5,1.4,0,.25,.8,.3,color);
+part(.5,1.4,0,.25,.8,.3,color);
+part(-.2,.5,0,.3,.9,.3,0x111827);
+part(.2,.5,0,.3,.9,.3,0x111827);
+return g;
+}
+
+let hero=warrior(0x283d61);
+hero.position.x=-2;
+scene.add(hero);
+
+let enemy=warrior(0x26765d);
+enemy.position.x=2;
+enemy.rotation.y=Math.PI;
+scene.add(enemy);
+
+let enemyHP=100;
+let jumping=false;
+let jumpY=0;
+
+function move(n){
+hero.position.x=Math.max(-5,Math.min(3,hero.position.x+n*.5));
+}
+
+function jump(){
+if(!jumping){jumping=true;jumpY=.5;}
+}
+
+function hit(){
+if(Math.abs(hero.position.x-enemy.position.x)<3&&enemyHP>0){
+enemyHP=Math.max(0,enemyHP-20);
+document.getElementById("info").nnerText=
+enemyHP===0?"🏆 RIYAD WINS!":"E
+document.getElementById("info").innerText="আরও কাছে গিয়ে আক্রমণ করো!";
+}
+}
+
+function animate(){
+requestAnimationFrame(animate);
+if(jumping){
+hero.position.y+=jumpY;
+jumpY-=.035;
+if(hero.position.y<=0){hero.position.y=0;jumping=false;}
+}
+camera.lookAt(hero.position.x*.2,1,0);
+renderer.render(scene,camera);
+}
+animate();
+
+window.addEventListener("resize",()=>{
+let w=document.getElementById("game").clientWidth;
+let h=document.getElementById("game").clientHeight;
+camera.aspect=w/h;camera.updateProjectionMatrix();
+renderer.setSize(w,h);
+});
+</script>
+</body>
+</html>
